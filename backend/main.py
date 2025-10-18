@@ -7,7 +7,7 @@ import pandas as pd
 
 # Import des fonctions de scraping
 from utils.linkedin_parserF import fetch_and_save_jobs
-from utils.run_spider import fetch_and_save_stagiaires  # fonction qui retourne DataFrame
+from utils.run_spider import fetch_and_save_stagiaires  # retourne DataFrame
 
 # Fichiers CSV pour les statuts
 STATUS_CSV = "jobs_status.csv"
@@ -27,26 +27,21 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 # -------------------------------
 # Pages HTML
 # -------------------------------
-
 @app.get("/")
 def root():
-    index_path = os.path.join(static_path, "index.html")
-    return FileResponse(index_path)
+    return FileResponse(os.path.join(static_path, "index.html"))
 
 @app.get("/linkedin")
 def linkedin_page():
-    path = os.path.join(static_path, "linkedin.html")
-    return FileResponse(path)
+    return FileResponse(os.path.join(static_path, "linkedin.html"))
 
 @app.get("/stagiaires")
 def stagiaires_page():
-    path = os.path.join(static_path, "stagiaires.html")
-    return FileResponse(path)
+    return FileResponse(os.path.join(static_path, "stagiaires.html"))
 
 # -------------------------------
 # Endpoints API
 # -------------------------------
-
 @app.get("/scrape/linkedin")
 def scrape_linkedin_jobs(
     url: str = Query(
@@ -98,7 +93,6 @@ async def save_job_status(job: dict):
             reader = csv.DictReader(f)
             existing_status = list(reader)
 
-    # Vérifie si le job existe déjà
     updated = False
     for j in existing_status:
         if j.get("Lien") == job.get("Lien"):
