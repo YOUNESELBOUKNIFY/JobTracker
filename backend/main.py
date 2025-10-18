@@ -1,14 +1,13 @@
 from fastapi import FastAPI, Query
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 import os
-from fastapi.responses import RedirectResponse
 import csv
 import pandas as pd
 
 # Import des fonctions de scraping
 from utils.linkedin_parserF import fetch_and_save_jobs
-from utils.run_spider import fetch_and_save_stagiaires  # fonction qui retourne DataFrame
+from utils.run_spider import fetch_and_save_stagiaires
 
 # Fichiers CSV pour les statuts
 STATUS_CSV = "jobs_status.csv"
@@ -31,20 +30,18 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 @app.get("/")
 def root():
-    index_path = os.path.join(static_path, "index.html")
-    return FileResponse(index_path)
-
-
-
+    """Page d'accueil"""
+    return FileResponse(os.path.join(static_path, "index.html"))
 
 @app.get("/linkedin")
 def linkedin_redirect():
+    """Redirection vers la page LinkedIn"""
     return RedirectResponse(url="/static/linkedin.html")
 
 @app.get("/stagiaires")
-def stagiaires_page():
-    path = os.path.join(static_path, "stagiaires.html")
-    return FileResponse(path)
+def stagiaires_redirect():
+    """Redirection vers la page Stagiaires"""
+    return RedirectResponse(url="/static/stagiaires.html")
 
 # -------------------------------
 # Endpoints API
