@@ -34,7 +34,7 @@ def root():
     index_path = os.path.join(static_path, "index.html")
     return FileResponse(index_path)
 
-@app.get("/linkedin")
+
 
 
 @app.get("/linkedin")
