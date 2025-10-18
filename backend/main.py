@@ -1,38 +1,52 @@
 from fastapi import FastAPI, Query
-from fastapi.responses import JSONResponse
-import pandas as pd
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-
 import os
 import csv
+import pandas as pd
 
 # Import des fonctions de scraping
 from utils.linkedin_parserF import fetch_and_save_jobs
 from utils.run_spider import fetch_and_save_stagiaires  # fonction qui retourne DataFrame
 
-from fastapi.responses import FileResponse
-import os
+# Fichiers CSV pour les statuts
+STATUS_CSV = "jobs_status.csv"
+APPLIED_CSV = "jobs_status.csv"
 
-# Chemin vers index.html
-index_path = os.path.join(os.path.dirname(__file__), "./static/index.html")
-
-
-
+# Création de l'application FastAPI
 app = FastAPI(
     title="Job Scraper API",
     description="API pour scraper plusieurs sites d'offres d'emploi",
     version="1.0"
 )
+
+# Chemin vers le dossier static
 static_path = os.path.join(os.path.dirname(__file__), "static")
-
-
 app.mount("/static", StaticFiles(directory=static_path), name="static")
+
+# -------------------------------
+# Pages HTML
+# -------------------------------
 
 @app.get("/")
 def root():
+    index_path = os.path.join(static_path, "index.html")
     return FileResponse(index_path)
 
-# Endpoint LinkedIn avec URL et max_jobs par défaut
+@app.get("/linkedin")
+def linkedin_page():
+    path = os.path.join(static_path, "linkedin.html")
+    return FileResponse(path)
+
+@app.get("/stagiaires")
+def stagiaires_page():
+    path = os.path.join(static_path, "stagiaires.html")
+    return FileResponse(path)
+
+# -------------------------------
+# Endpoints API
+# -------------------------------
+
 @app.get("/scrape/linkedin")
 def scrape_linkedin_jobs(
     url: str = Query(
@@ -47,53 +61,32 @@ def scrape_linkedin_jobs(
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-# Endpoint Stagiaires
 @app.get("/scrape/stagiaires")
 def scrape_stagiaires_jobs():
     try:
-        # URL du site stagiaires.ma
         BASE_URL = "https://www.stagiaires.ma/offres-de-stages-et-premier-emploi-maroc/?types_de_contrat=Stage"
-
-        # Récupère les offres et retourne un DataFrame
         df = fetch_and_save_stagiaires(BASE_URL, max_jobs=100, pause=1.5)
-
-        # Convertit le DataFrame en dictionnaire pour JSONResponse
         return JSONResponse(content=df.to_dict(orient="records"))
-
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
-# Endpoint pour enregistrer un job déjà postulé
 
-
-# Récupérer les statuts existants
 @app.get("/jobs/status/list")
 def get_job_status_list():
     if not os.path.exists(STATUS_CSV):
         return JSONResponse(content={})
-    
     with open(STATUS_CSV, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         status_dict = {row["Lien"]: row["Statut"] for row in reader if row.get("Lien")}
-    
     return JSONResponse(content=status_dict)
 
-APPLIED_CSV = "jobs_status.csv"
-
-
-
-# Endpoint pour récupérer tous les jobs déjà enregistrés (avec tous les champs)
 @app.get("/jobs/applied/full")
 def get_applied_jobs_full():
     if not os.path.exists(APPLIED_CSV):
         return JSONResponse(content=[])
-    
     with open(APPLIED_CSV, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         applied_jobs = [row for row in reader]
-    
     return JSONResponse(content=applied_jobs)
-# jobs_status.csv
-STATUS_CSV = "jobs_status.csv"
 
 @app.post("/jobs/status")
 async def save_job_status(job: dict):
@@ -109,7 +102,7 @@ async def save_job_status(job: dict):
     updated = False
     for j in existing_status:
         if j.get("Lien") == job.get("Lien"):
-            j.update(job)  # Mettre à jour tous les champs
+            j.update(job)
             updated = True
             break
 
