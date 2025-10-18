@@ -31,11 +31,11 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 def root():
     return FileResponse(os.path.join(static_path, "index.html"))
 
-@app.get("static/linkedin")
+@app.get("/static/linkedin")
 def linkedin_page():
     return FileResponse(os.path.join(static_path, "linkedin.html"))
 
-@app.get("static/stagiaires")
+@app.get("/static/stagiaires")
 def stagiaires_page():
     return FileResponse(os.path.join(static_path, "stagiaires.html"))
 
