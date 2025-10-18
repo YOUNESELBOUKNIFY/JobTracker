@@ -10,6 +10,14 @@ import csv
 from utils.linkedin_parserF import fetch_and_save_jobs
 from utils.run_spider import fetch_and_save_stagiaires  # fonction qui retourne DataFrame
 
+from fastapi.responses import FileResponse
+import os
+
+# Chemin vers index.html
+index_path = os.path.join(os.path.dirname(__file__), "./static/index.html")
+
+
+
 app = FastAPI(
     title="Job Scraper API",
     description="API pour scraper plusieurs sites d'offres d'emploi",
@@ -22,7 +30,7 @@ app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 @app.get("/")
 def root():
-    return {"message": "Bienvenue sur l'API de scraping des offres d'emploi"}
+    return FileResponse(index_path)
 
 # Endpoint LinkedIn avec URL et max_jobs par défaut
 @app.get("/scrape/linkedin")
