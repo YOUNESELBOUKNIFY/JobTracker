@@ -15,7 +15,8 @@ app = FastAPI(
     description="API pour scraper plusieurs sites d'offres d'emploi",
     version="1.0"
 )
-static_path = os.path.join(os.path.dirname(__file__), "../frontend/static")
+static_path = os.path.join(os.path.dirname(__file__), "static")
+
 
 app.mount("/static", StaticFiles(directory=static_path), name="static")
 
