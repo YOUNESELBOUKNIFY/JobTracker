@@ -50,7 +50,7 @@ def stagiaires_redirect():
 @app.get("/scrape/linkedin")
 def scrape_linkedin_jobs(
     url: str = Query(
-        "https://www.linkedin.com/jobs/search/?currentJobId=4331314481&f_TPR=r86400&geoId=105015875&keywords=Data&origin=JOB_SEARCH_PAGE_JOB_FILTER&originalSubdomain=fr&refresh=true",
+        "https://www.linkedin.com/jobs/search/?currentJobId=4331335184&f_E=1&f_TPR=r86400&geoId=105015875&keywords=Data&origin=JOB_SEARCH_PAGE_JOB_FILTER&originalSubdomain=fr&refresh=true&sortBy=R&spellCorrectionEnabled=true",
         description="URL de recherche LinkedIn"
     ),
     max_jobs: int = Query(100, description="Nombre maximum de jobs à récupérer")
