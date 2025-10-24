@@ -16,7 +16,7 @@
 <!-- ============== HEADER ============== -->
 <header class="bg-blue-600 text-white shadow-md py-4">
   <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
-    <h1 class="text-2xl font-bold">🔎 Job Scraper</h1>
+    <h1 class="text-2xl font-bold"> Job Scraper</h1>
     <button id="scrapeBtn" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 font-semibold">
       Scraper LinkedIn
     </button>
@@ -176,20 +176,52 @@ function displayNewOffers() {
         <td class="p-2">${job.Entreprise}</td>
         <td class="p-2">${job.Localisation}</td>
         <td class="p-2"><a href="${job.Lien}" target="_blank" class="text-blue-600 underline">Voir</a></td>
-        <td class="p-2">${job.Publié}</td>
         <td class="p-2 text-right">
           <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Enregistrer</button>
         </td>
       `;
+      // Bouton Enregistrer
       row.querySelector("button").addEventListener("click", async () => {
-        await saveJobStatus(job);
+        // 1️ Sauvegarder côté serveur
+        await saveJobStatus({...job, Statut: "À postuler"});
+        
+        // 2️ Supprimer de la table nouvelles offres
         row.remove();
+        newOffers = newOffers.filter(j2 => extractJobId(j2.Lien) !== extractJobId(job.Lien));
+        sessionStorage.setItem("newOffers", JSON.stringify(newOffers));
+        
+        // Ajouter directement dans la table des offres enregistrées
+        appliedIds.push(extractJobId(job.Lien));
+        addAppliedJobRow(job, "À postuler");
+        
         updateCounts();
       });
       newTbody.appendChild(row);
     });
   updateCounts();
 }
+
+function addAppliedJobRow(job, statut) {
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td class="p-2">${job.Titre}</td>
+    <td class="p-2">${job.Entreprise}</td>
+    <td class="p-2">${job.Localisation}</td>
+    <td class="p-2"><a href="${job.Lien}" target="_blank" class="text-blue-600 underline">Voir</a></td>
+    <td class="p-2">
+      <select class="statusSelect px-2 py-1 border rounded">
+        ${statusOptions.map(s => `<option value="${s}" ${s===statut?'selected':''}>${s}</option>`).join('')}
+      </select>
+    </td>
+  `;
+  // Changement du statut
+  row.querySelector(".statusSelect").addEventListener("change", async (e) => {
+    const newStatus = e.target.value;
+    await saveJobStatus({...job, Statut: newStatus});
+  });
+  appliedTbody.appendChild(row);
+}
+
 
 // Scraper LinkedIn
 async function scrapeLinkedin() {
