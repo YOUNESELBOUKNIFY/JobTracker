@@ -6,31 +6,50 @@
     <title>Job Scraper App</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gradient-to-b from-gray-100 via-gray-50 to-gray-100 min-h-screen flex flex-col font-sans">
 
     <!-- Header -->
-    <header class="bg-gray-800 text-white w-full p-4">
-        <h1 class="text-2xl font-bold">Job Scraper</h1>
+    <header class="bg-gradient-to-r from-purple-600 to-blue-600 text-white w-full p-6 shadow-lg">
+        <h1 class="text-3xl font-extrabold text-center md:text-left">Job Scraper</h1>
     </header>
 
     <!-- Main Content -->
-    <main class="flex flex-col items-center flex-1 p-6">
-        <h2 class="text-3xl font-bold text-gray-800 mb-4">Bienvenue sur Job Scraper</h2>
-        <p class="text-gray-700 text-center max-w-xl mb-6">
-            Job Scraper est une application web conçue pour faciliter la recherche d’offres d’emploi et de stages.
-            Vous pouvez accéder directement aux dernières offres sur <strong>LinkedIn</strong> ou sur <strong>Stagiaires.ma</strong>,
-            consulter les détails, suivre vos candidatures et organiser vos opportunités en un seul endroit.
-        </p>
+    <main class="flex flex-col items-center flex-1 p-6 md:px-12">
+        <div class="text-center max-w-3xl mb-8">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Bienvenue sur Job Scraper</h2>
+            <p class="text-gray-700 text-lg">
+                Job Scraper est une application web conçue pour faciliter la recherche d’offres d’emploi et de stages.
+                Accédez directement aux dernières offres sur <strong>LinkedIn</strong> ou <strong>Stagiaires.ma</strong>,
+                consultez les détails, suivez vos candidatures et organisez vos opportunités en un seul endroit.
+            </p>
+        </div>
 
-        <div class="flex gap-4">
-            <button onclick="window.location.href='./static/linkedin.html'" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">LinkedIn</button>
-            <button onclick="window.location.href='./static/stagiaires.html'" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Stagiaires.ma</button>
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- LinkedIn Card -->
+            <div class="bg-white shadow-lg rounded-xl p-6 w-64 hover:scale-105 transform transition duration-300 cursor-pointer"
+                 onclick="window.location.href='./static/linkedin.html'">
+                <h3 class="text-xl font-semibold mb-2 text-blue-600">LinkedIn</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                    Découvrez les dernières offres d’emploi sur LinkedIn et postulez facilement.
+                </p>
+                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full font-medium">Accéder</button>
+            </div>
+
+            <!-- Stagiaires.ma Card -->
+            <div class="bg-white shadow-lg rounded-xl p-6 w-64 hover:scale-105 transform transition duration-300 cursor-pointer"
+                 onclick="window.location.href='./static/stagiaires.html'">
+                <h3 class="text-xl font-semibold mb-2 text-green-600">Stagiaires.ma</h3>
+                <p class="text-gray-600 text-sm mb-4">
+                    Consultez les dernières offres de stages et organisez vos candidatures facilement.
+                </p>
+                <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full font-medium">Accéder</button>
+            </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white w-full p-4 text-center">
-        &copy; 2025 Job Scraper - YOUNES ELBOUKNIFY - Tous droits réservés.
+    <footer class="bg-gray-900 text-white w-full p-6 text-center mt-auto shadow-inner">
+        &copy; 2025 Job Scraper - <strong>YOUNES ELBOUKNIFY</strong> - Tous droits réservés.
     </footer>
 
 </body>
