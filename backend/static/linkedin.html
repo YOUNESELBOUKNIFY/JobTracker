@@ -16,7 +16,7 @@
 <!-- ============== HEADER ============== -->
 <header class="bg-blue-600 text-white shadow-md py-4">
   <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
-    <h1 class="text-2xl font-bold"> Job Scraper</h1>
+    <h1 class="text-2xl font-bold">Job Scraper</h1>
     <button id="scrapeBtn" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 font-semibold">
       Scraper LinkedIn
     </button>
@@ -39,23 +39,23 @@
   </div>
 
   <!-- Offres enregistrées -->
-<section class="mb-10">
-  <h2 class="text-xl font-semibold mb-2">Offres enregistrées 
-    <span id="appliedOffersCount" class="text-green-600 font-bold">(0)</span>
-  </h2>
-  <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
-    <thead class="bg-green-200">
-      <tr>
-        <th class="p-3 text-left">Titre</th>
-        <th class="p-3 text-left">Entreprise</th>
-        <th class="p-3 text-left">Localisation</th>
-        <th class="p-3 text-left">Lien</th>
-        <th class="p-3 text-left">Statut</th>
-      </tr>
-    </thead>
-    <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
-  </table>
-</section>
+  <section class="mb-10">
+    <h2 class="text-xl font-semibold mb-2">Offres enregistrées 
+      <span id="appliedOffersCount" class="text-green-600 font-bold">(0)</span>
+    </h2>
+    <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
+      <thead class="bg-green-200">
+        <tr>
+          <th class="p-3 text-left">Titre</th>
+          <th class="p-3 text-left">Entreprise</th>
+          <th class="p-3 text-left">Localisation</th>
+          <th class="p-3 text-left">Lien</th>
+          <th class="p-3 text-left">Statut</th>
+        </tr>
+      </thead>
+      <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
+    </table>
+  </section>
 
   <!-- Nouvelles offres -->
   <section>
@@ -84,7 +84,6 @@
 </footer>
 
 <script>
-// ================= VARIABLES =================
 const scrapeBtn = document.getElementById("scrapeBtn");
 const scrapingLoader = document.getElementById("scrapingLoader");
 const appliedTbody = document.getElementById("applied-offers");
@@ -96,10 +95,8 @@ const newCountEl = document.getElementById("newOffersCount");
 let newOffers = JSON.parse(sessionStorage.getItem("newOffers") || "[]");
 let appliedIds = [];
 
-// ================= FONCTIONS =================
-const extractJobId = url => url?.split("?")[0].split("-").pop().match(/^\d+$/) ? url.split("-").pop() : null;
-
 const statusOptions = ["À postuler", "Postulé", "Entretien", "Accepté", "Refusé"];
+const extractJobId = url => url?.split("?")[0].split("-").pop().match(/^\d+$/) ? url.split("-").pop() : null;
 
 const updateCounts = () => {
   appliedCountEl.textContent = `(${appliedTbody.rows.length})`;
@@ -107,17 +104,14 @@ const updateCounts = () => {
   newCountEl.textContent = `(${newTbody.rows.length})`;
 }
 
-// Charger les offres enregistrées
+// Charger offres enregistrées
 async function loadAppliedJobs() {
   try {
     const res = await fetch("/jobs/applied/full");
     const data = await res.json();
     appliedTbody.innerHTML = "";
     appliedIds = data.map(j => extractJobId(j.Lien)).filter(Boolean);
-
-    data.forEach(job => {
-      addAppliedJobRow(job, job.Statut || "À postuler");
-    });
+    data.forEach(job => addAppliedJobRow(job, job.Statut || "À postuler"));
     updateCounts();
   } catch (err) { console.error("Erreur chargement :", err); }
 }
@@ -141,7 +135,7 @@ function addAppliedJobRow(job, statut) {
   appliedTbody.appendChild(row);
 }
 
-// Sauvegarder une offre / statut
+// Sauvegarder statut
 async function saveJobStatus(job) {
   try {
     const res = await fetch("/jobs/status", {
@@ -153,17 +147,18 @@ async function saveJobStatus(job) {
   } catch (err) { alert("Erreur : " + err.message); }
 }
 
-// ================= Nouvelles offres =================
+// Parser "Publié"
 function parseRelativeDays(text) {
-  if(!text) return 0;
+  if(!text) return Infinity;
   text = text.toLowerCase();
-  if(text.includes("jour")) return parseInt(text)||0;
-  if(text.includes("semaine")) return (parseInt(text)||0)*7;
-  if(text.includes("mois")) return (parseInt(text)||0)*30;
-  if(text.includes("année")) return (parseInt(text)||0)*365;
-  return 0;
+  if(text.includes("jour")) return parseInt(text) || 0;
+  if(text.includes("semaine")) return (parseInt(text) || 0) * 7;
+  if(text.includes("mois")) return (parseInt(text) || 0) * 30;
+  if(text.includes("année")) return (parseInt(text) || 0) * 365;
+  return Infinity;
 }
 
+// Afficher nouvelles offres triées
 function displayNewOffers() {
   newTbody.innerHTML = "";
   newOffers
@@ -181,9 +176,9 @@ function displayNewOffers() {
         </td>
       `;
       row.querySelector("button").addEventListener("click", async () => {
-        await saveJobStatus({...job, Statut: "À postuler"});
+        await saveJobStatus({...job, Statut:"À postuler"});
         row.remove();
-        newOffers = newOffers.filter(j2 => extractJobId(j2.Lien)!==extractJobId(job.Lien));
+        newOffers = newOffers.filter(j2 => extractJobId(j2.Lien) !== extractJobId(job.Lien));
         sessionStorage.setItem("newOffers", JSON.stringify(newOffers));
         appliedIds.push(extractJobId(job.Lien));
         addAppliedJobRow(job, "À postuler");
@@ -195,6 +190,7 @@ function displayNewOffers() {
   updateCounts();
 }
 
+// Trier par date
 function sortNewOffersByDate() {
   const rows = Array.from(newTbody.querySelectorAll("tr"));
   rows.sort((a,b) => parseRelativeDays(a.cells[4].innerText) - parseRelativeDays(b.cells[4].innerText));
@@ -202,7 +198,7 @@ function sortNewOffersByDate() {
   rows.forEach(r => newTbody.appendChild(r));
 }
 
-// ================= Scraping =================
+// Scraper LinkedIn
 async function scrapeLinkedin() {
   scrapingLoader.style.display = "flex";
   try {
@@ -215,7 +211,7 @@ async function scrapeLinkedin() {
   finally { scrapingLoader.style.display = "none"; }
 }
 
-// ================= INIT =================
+// Init
 window.onload = async () => { await loadAppliedJobs(); displayNewOffers(); };
 scrapeBtn.addEventListener("click", scrapeLinkedin);
 </script>

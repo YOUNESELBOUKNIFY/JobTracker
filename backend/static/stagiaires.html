@@ -87,7 +87,12 @@ const statusOptions = ["À postuler", "Postulé", "Entretien", "Accepté", "Refu
 let newOffers = JSON.parse(sessionStorage.getItem("newOffers") || "[]");
 let appliedIds = [];
 
-function extractJobId(url){ if(!url) return null; const parts = url.split("/").filter(Boolean); return parts[parts.length-1]; }
+function extractJobId(url){ 
+  if(!url) return null; 
+  const parts = url.split("/").filter(Boolean); 
+  return parts[parts.length-1]; 
+}
+
 function updateCounts(){
   appliedCountEl.textContent = `(${appliedTbody.querySelectorAll("tr").length})`;
   savedCountEl.textContent = appliedTbody.querySelectorAll("tr").length;
@@ -161,6 +166,7 @@ function displayNewOffers(){
     });
     newTbody.appendChild(row);
   });
+  sortNewOffersByPublished();
   updateCounts();
 }
 
@@ -181,6 +187,7 @@ async function scrapeStagiaires(){
 // Tri Publié
 let publishedSortAsc = true;
 function parseRelativeDays(text){
+  if(!text) return Infinity;
   text=text.toLowerCase();
   if(text.includes("jour")) return parseInt(text)||0;
   if(text.includes("semaine")) return (parseInt(text)||0)*7;
