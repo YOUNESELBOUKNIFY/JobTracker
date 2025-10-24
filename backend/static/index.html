@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -6,31 +7,12 @@
     <title>Job Scraper App</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Job Scraper</h1>
 
-    <!-- Header -->
-    <header class="bg-gray-800 text-white w-full p-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Job Scraper</h1>
-        <nav class="space-x-4">
-            <a href="linkedin.html" class="hover:text-gray-300">LinkedIn</a>
-            <a href="stagiaires.html" class="hover:text-gray-300">Stagiaires.ma</a>
-        </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex flex-col items-center flex-1 p-6">
-        <h2 class="text-3xl font-bold text-gray-800 mb-6">Bienvenue sur Job Scraper</h2>
-
-        <div class="flex gap-4">
-            <button onclick="window.location.href='linkedin.html'" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">LinkedIn</button>
-            <button onclick="window.location.href='stagiaires.html'" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Stagiaires.ma</button>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white w-full p-4 text-center">
-        &copy; 2025 Job Scraper. Younes ELBOUKNIFY Tous droits réservés.
-    </footer>
-
+    <div class="flex gap-4">
+        <button onclick="window.location.href='linkedin.html'" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">LinkedIn</button>
+        <button onclick="window.location.href='stagiaires.html'" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Stagiaires.ma</button>
+    </div>
 </body>
 </html>
