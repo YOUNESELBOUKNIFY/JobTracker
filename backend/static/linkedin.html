@@ -39,24 +39,24 @@
   </div>
 
   <!-- Offres enregistrées -->
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Offres enregistrées 
-      <span id="appliedOffersCount" class="text-green-600 font-bold">(0)</span>
-    </h2>
-    <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
-      <thead class="bg-green-200">
-        <tr>
-          <th class="p-3 text-left">Titre</th>
-          <th class="p-3 text-left">Entreprise</th>
-          <th class="p-3 text-left">Localisation</th>
-          <th class="p-3 text-left">Lien</th>
-          <th class="p-3 text-left">Publié</th>
-          <th class="p-3 text-left">Statut</th>
-        </tr>
-      </thead>
-      <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
-    </table>
-  </section>
+<section class="mb-10">
+  <h2 class="text-xl font-semibold mb-2">Offres enregistrées 
+    <span id="appliedOffersCount" class="text-green-600 font-bold">(0)</span>
+  </h2>
+  <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
+    <thead class="bg-green-200">
+      <tr>
+        <th class="p-3 text-left">Titre</th>
+        <th class="p-3 text-left">Entreprise</th>
+        <th class="p-3 text-left">Localisation</th>
+        <th class="p-3 text-left">Lien</th>
+        <th class="p-3 text-left">Statut</th>
+      </tr>
+    </thead>
+    <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
+  </table>
+</section>
+
 
   <!-- Nouvelles offres -->
   <section>
@@ -116,6 +116,10 @@ function getStatusColor(status) {
 }
 
 // Charger les offres enregistrées (sans actions)
+// Liste des statuts possibles
+const statusOptions = ["À postuler", "Postulé", "Entretien", "Accepté", "Refusé"];
+
+// Charger les offres enregistrées avec statut modifiable
 async function loadAppliedJobs() {
   try {
     const res = await fetch("/jobs/applied/full");
@@ -130,14 +134,23 @@ async function loadAppliedJobs() {
         <td class="p-2">${job.Entreprise}</td>
         <td class="p-2">${job.Localisation}</td>
         <td class="p-2"><a href="${job.Lien}" target="_blank" class="text-blue-600 underline">Voir</a></td>
-        <td class="p-2">${job.Publié}</td>
-        <td class="p-2 ${getStatusColor(job.Statut)}">${job.Statut}</td>
+        <td class="p-2">
+          <select class="statusSelect px-2 py-1 border rounded">
+            ${statusOptions.map(s => `<option value="${s}" ${job.Statut===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
       `;
+      // Quand le statut change, on sauvegarde automatiquement
+      row.querySelector(".statusSelect").addEventListener("change", async (e) => {
+        const newStatus = e.target.value;
+        await saveJobStatus({...job, Statut: newStatus});
+      });
       appliedTbody.appendChild(row);
     });
     updateCounts();
   } catch (err) { console.error("Erreur chargement :", err); }
 }
+
 
 // Sauvegarder une nouvelle offre
 async function saveJobStatus(job) {
