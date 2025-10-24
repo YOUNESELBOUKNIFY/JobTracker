@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Job Scraper - LinkedIn</title>
+  <title>Job Scraper - Younes</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #scrapingLoader { display: none; }
@@ -13,9 +13,10 @@
 </head>
 
 <body class="bg-gray-100 flex flex-col min-h-screen">
+<!-- ============== HEADER ============== -->
 <header class="bg-blue-600 text-white shadow-md py-4">
   <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
-    <h1 class="text-2xl font-bold">Job Scraper</h1>
+    <h1 class="text-2xl font-bold"> Job Scraper</h1>
     <button id="scrapeBtn" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 font-semibold">
       Scraper LinkedIn
     </button>
@@ -29,30 +30,32 @@
   </div>
 </header>
 
+<!-- ============== MAIN ============== -->
 <main class="flex-grow max-w-6xl mx-auto p-6">
+  <!-- Compteur -->
   <div class="mb-6 flex justify-end items-center gap-2 text-green-700 font-semibold">
     <span>Total Offres enregistrées :</span>
     <span id="savedOffersCount" class="text-green-600 font-bold">0</span>
   </div>
 
   <!-- Offres enregistrées -->
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Offres enregistrées 
-      <span id="appliedOffersCount" class="text-green-600 font-bold">(0)</span>
-    </h2>
-    <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
-      <thead class="bg-green-200">
-        <tr>
-          <th class="p-3 text-left">Titre</th>
-          <th class="p-3 text-left">Entreprise</th>
-          <th class="p-3 text-left">Localisation</th>
-          <th class="p-3 text-left">Lien</th>
-          <th class="p-3 text-left">Statut</th>
-        </tr>
-      </thead>
-      <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
-    </table>
-  </section>
+<section class="mb-10">
+  <h2 class="text-xl font-semibold mb-2">Offres enregistrées 
+    <span id="appliedOffersCount" class="text-green-600 font-bold">(0)</span>
+  </h2>
+  <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
+    <thead class="bg-green-200">
+      <tr>
+        <th class="p-3 text-left">Titre</th>
+        <th class="p-3 text-left">Entreprise</th>
+        <th class="p-3 text-left">Localisation</th>
+        <th class="p-3 text-left">Lien</th>
+        <th class="p-3 text-left">Statut</th>
+      </tr>
+    </thead>
+    <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
+  </table>
+</section>
 
   <!-- Nouvelles offres -->
   <section>
@@ -75,12 +78,13 @@
   </section>
 </main>
 
+<!-- ============== FOOTER ============== -->
 <footer class="bg-gray-800 text-gray-200 py-4 mt-auto text-center">
   &copy; 2025 Job Scraper - <strong>Younes Elbouknify</strong>
 </footer>
 
 <script>
-// Variables
+// ================= VARIABLES =================
 const scrapeBtn = document.getElementById("scrapeBtn");
 const scrapingLoader = document.getElementById("scrapingLoader");
 const appliedTbody = document.getElementById("applied-offers");
@@ -92,20 +96,32 @@ const newCountEl = document.getElementById("newOffersCount");
 let newOffers = JSON.parse(sessionStorage.getItem("newOffers") || "[]");
 let appliedIds = [];
 
-// Extraire ID job LinkedIn
+// ================= FONCTIONS =================
 const extractJobId = url => url?.split("?")[0].split("-").pop().match(/^\d+$/) ? url.split("-").pop() : null;
 
-// Liste des statuts possibles
 const statusOptions = ["À postuler", "Postulé", "Entretien", "Accepté", "Refusé"];
 
-// Mettre à jour les compteurs
 const updateCounts = () => {
   appliedCountEl.textContent = `(${appliedTbody.rows.length})`;
   savedCountEl.textContent = appliedTbody.rows.length;
   newCountEl.textContent = `(${newTbody.rows.length})`;
-};
+}
 
-// Ajouter une offre enregistrée
+// Charger les offres enregistrées
+async function loadAppliedJobs() {
+  try {
+    const res = await fetch("/jobs/applied/full");
+    const data = await res.json();
+    appliedTbody.innerHTML = "";
+    appliedIds = data.map(j => extractJobId(j.Lien)).filter(Boolean);
+
+    data.forEach(job => {
+      addAppliedJobRow(job, job.Statut || "À postuler");
+    });
+    updateCounts();
+  } catch (err) { console.error("Erreur chargement :", err); }
+}
+
 function addAppliedJobRow(job, statut) {
   const row = document.createElement("tr");
   row.innerHTML = `
@@ -120,26 +136,12 @@ function addAppliedJobRow(job, statut) {
     </td>
   `;
   row.querySelector(".statusSelect").addEventListener("change", async e => {
-    const newStatus = e.target.value;
-    await saveJobStatus({...job, Statut: newStatus});
+    await saveJobStatus({...job, Statut: e.target.value});
   });
   appliedTbody.appendChild(row);
 }
 
-// Charger les offres enregistrées
-async function loadAppliedJobs() {
-  try {
-    const res = await fetch("/jobs/applied/full");
-    const data = await res.json();
-    appliedTbody.innerHTML = "";
-    appliedIds = data.map(j => extractJobId(j.Lien)).filter(Boolean);
-
-    data.forEach(job => addAppliedJobRow(job, job.Statut));
-    updateCounts();
-  } catch (err) { console.error("Erreur chargement :", err); }
-}
-
-// Sauvegarder une offre
+// Sauvegarder une offre / statut
 async function saveJobStatus(job) {
   try {
     const res = await fetch("/jobs/status", {
@@ -151,10 +153,21 @@ async function saveJobStatus(job) {
   } catch (err) { alert("Erreur : " + err.message); }
 }
 
-// Afficher nouvelles offres
+// ================= Nouvelles offres =================
+function parseRelativeDays(text) {
+  if(!text) return 0;
+  text = text.toLowerCase();
+  if(text.includes("jour")) return parseInt(text)||0;
+  if(text.includes("semaine")) return (parseInt(text)||0)*7;
+  if(text.includes("mois")) return (parseInt(text)||0)*30;
+  if(text.includes("année")) return (parseInt(text)||0)*365;
+  return 0;
+}
+
 function displayNewOffers() {
   newTbody.innerHTML = "";
-  newOffers.filter(j => !appliedIds.includes(extractJobId(j.Lien)))
+  newOffers
+    .filter(j => !appliedIds.includes(extractJobId(j.Lien)))
     .forEach(job => {
       const row = document.createElement("tr");
       row.innerHTML = `
@@ -163,14 +176,14 @@ function displayNewOffers() {
         <td class="p-2">${job.Localisation}</td>
         <td class="p-2"><a href="${job.Lien}" target="_blank" class="text-blue-600 underline">Voir</a></td>
         <td class="p-2">${job.Publié||""}</td>
-        <td class="p-2 text-right">
+        <td class="p-2">
           <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Enregistrer</button>
         </td>
       `;
       row.querySelector("button").addEventListener("click", async () => {
-        await saveJobStatus({...job, Statut:"À postuler"});
+        await saveJobStatus({...job, Statut: "À postuler"});
         row.remove();
-        newOffers = newOffers.filter(j2 => extractJobId(j2.Lien) !== extractJobId(job.Lien));
+        newOffers = newOffers.filter(j2 => extractJobId(j2.Lien)!==extractJobId(job.Lien));
         sessionStorage.setItem("newOffers", JSON.stringify(newOffers));
         appliedIds.push(extractJobId(job.Lien));
         addAppliedJobRow(job, "À postuler");
@@ -178,26 +191,33 @@ function displayNewOffers() {
       });
       newTbody.appendChild(row);
     });
+  sortNewOffersByDate();
   updateCounts();
 }
 
-// Scraper LinkedIn
+function sortNewOffersByDate() {
+  const rows = Array.from(newTbody.querySelectorAll("tr"));
+  rows.sort((a,b) => parseRelativeDays(a.cells[4].innerText) - parseRelativeDays(b.cells[4].innerText));
+  newTbody.innerHTML = "";
+  rows.forEach(r => newTbody.appendChild(r));
+}
+
+// ================= Scraping =================
 async function scrapeLinkedin() {
-  scrapingLoader.style.display="flex";
+  scrapingLoader.style.display = "flex";
   try {
     const res = await fetch("/scrape/linkedin");
     const data = await res.json();
     newOffers = data.filter(j => !appliedIds.includes(extractJobId(j.Lien)));
     sessionStorage.setItem("newOffers", JSON.stringify(newOffers));
     displayNewOffers();
-  } catch (err) { console.error(err); }
-  finally { scrapingLoader.style.display="none"; }
+  } catch(err) { console.error(err); }
+  finally { scrapingLoader.style.display = "none"; }
 }
 
-// Init
+// ================= INIT =================
 window.onload = async () => { await loadAppliedJobs(); displayNewOffers(); };
 scrapeBtn.addEventListener("click", scrapeLinkedin);
-
 </script>
 </body>
 </html>
