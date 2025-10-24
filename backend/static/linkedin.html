@@ -47,7 +47,6 @@
         <th class="p-3 uppercase text-left text-gray-700 font-medium">Lien</th>
         <th class="p-3 uppercase text-left text-gray-700 font-medium">Publié</th>
         <th class="p-3 uppercase text-left text-gray-700 font-medium">Statut</th>
-        <th class="p-3 uppercase text-left text-gray-700 font-medium">Actions</th>
       </tr>
     </thead>
     <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
@@ -172,9 +171,6 @@ async function loadAppliedJobs() {
             <option value="Entretien" ${job.Statut==='Entretien'?'selected':''}>Entretien</option>
             <option value="Refusé" ${job.Statut==='Refusé'?'selected':''}>Refusé</option>
           </select>
-        </td>
-        <td class="p-2">
-          <button class="saveStatusBtn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Enregistrer</button>
         </td>
       `;
       appliedTbody.appendChild(row);
