@@ -133,7 +133,7 @@ async def periodic_scraping():
             print("Erreur lors du scraping automatique :", e)
         finally:
             db.close()
-        await asyncio.sleep(3600)  # attendre 1h avant le prochain scraping
+        await asyncio.sleep(4 * 3600)  # attendre 1h avant le prochain scraping
 
 # ---------------- Startup ----------------
 @app.on_event("startup")
