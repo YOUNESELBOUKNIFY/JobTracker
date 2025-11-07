@@ -150,7 +150,7 @@ function startScrapeCountdown(){
     .then(sessions=>{
       if(sessions.length===0) return;
       const lastSession=new Date(sessions[0].created_at);
-      nextScrapeTime=new Date(lastSession.getTime()+3600*1000);
+      nextScrapeTime=new Date(lastSession.getTime()+4*3600*1000);
     })
     .catch(err=>console.error(err));
 
