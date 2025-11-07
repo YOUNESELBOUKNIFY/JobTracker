@@ -1,17 +1,19 @@
 import requests
-import pandas as pd
 from bs4 import BeautifulSoup
 import time
 
-def fetch_and_save_jobs(base_url: str, output_file: str = "linkedin_jobs.csv", max_jobs: int = 200, pause: float = 2.0):
+def fetch_and_save_jobs(base_url: str, max_jobs: int = 200, pause: float = 2.0):
     """
-    Récupère toutes les offres LinkedIn en suivant la pagination, parse les infos et exporte en CSV.
-    
+    Récupère toutes les offres LinkedIn en suivant la pagination et parse les infos.
+    Ne crée aucun fichier CSV, renvoie directement la liste des jobs.
+
     Args:
         base_url (str): URL de recherche LinkedIn sans paramètre start
-        output_file (str): Nom du fichier CSV à créer
         max_jobs (int): Nombre maximum d'offres à récupérer
         pause (float): Temps de pause entre les requêtes pour éviter le blocage
+
+    Returns:
+        list[dict]: Liste de dictionnaires avec les informations des jobs
     """
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
@@ -57,8 +59,4 @@ def fetch_and_save_jobs(base_url: str, output_file: str = "linkedin_jobs.csv", m
 
         time.sleep(pause)  # pause pour réduire le risque de blocage
 
-    # Exporter vers CSV
-    df = pd.DataFrame(all_jobs)
-    df.to_csv(output_file, index=False, encoding='utf-8')
-    print(f"Tous les jobs sauvegardés dans {output_file} ({len(df)} lignes)")
-    return df
+    return all_jobs

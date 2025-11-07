@@ -1,219 +1,176 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Job Scraper - Younes</title>
+  <meta charset="UTF-8">
+  <title>Jobs LinkedIn - Job Scraper</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    #scrapingLoader { display: none; }
-    table tr:nth-child(even) { background-color: #f9fafb; }
-    table tr:hover { background-color: #e0f2fe; transition: background-color 0.2s; }
-    button { transition: all 0.2s; }
+    .job-card { transition: transform 0.2s, box-shadow 0.2s; }
+    .job-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .pagination-btn { transition: background 0.2s; }
+    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-sans">
 
-<body class="bg-gray-100 flex flex-col min-h-screen">
-<!-- ============== HEADER ============== -->
-<header class="bg-blue-600 text-white shadow-md py-4">
-  <div class="max-w-6xl mx-auto flex justify-between items-center px-4">
-    <h1 class="text-2xl font-bold">Job Scraper</h1>
-    <button id="scrapeBtn" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 font-semibold">
-      Scraper LinkedIn
-    </button>
+<header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md py-4">
+  <div class="max-w-7xl mx-auto flex justify-between items-center px-4">
+    <h1 class="text-2xl font-bold">Jobs LinkedIn</h1>
+    <div class="flex gap-2">
+      <button id="clearDBBtn" class="bg-gray-800 px-4 py-2 rounded hover:bg-gray-900 font-semibold text-white">Vider base de données</button>
+    </div>
   </div>
-  <div id="scrapingLoader" class="max-w-6xl mx-auto px-4 mt-2 flex items-center gap-2 text-indigo-200 font-semibold">
-    <svg class="animate-spin h-5 w-5 text-indigo-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-    </svg>
-    Scraping en cours...
+  <div class="max-w-7xl mx-auto px-4 mt-2 text-indigo-200 font-semibold flex gap-2 items-center">
+    <span>Prochaine session de scraping dans:</span>
+    <span id="nextScrapeTimer" class="font-bold">--:--:--</span>
   </div>
 </header>
 
-<!-- ============== MAIN ============== -->
-<main class="flex-grow max-w-6xl mx-auto p-6">
-  <!-- Compteur -->
-  <div class="mb-6 flex justify-end items-center gap-2 text-green-700 font-semibold">
-    <span>Total Offres enregistrées :</span>
-    <span id="savedOffersCount" class="text-green-600 font-bold">0</span>
-  </div>
-
-  <!-- Offres enregistrées -->
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-2">Offres enregistrées 
-      <span id="appliedOffersCount" class="text-green-600 font-bold">(0)</span>
-    </h2>
-    <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
-      <thead class="bg-green-200">
-        <tr>
-          <th class="p-3 text-left">Titre</th>
-          <th class="p-3 text-left">Entreprise</th>
-          <th class="p-3 text-left">Localisation</th>
-          <th class="p-3 text-left">Lien</th>
-          <th class="p-3 text-left">Statut</th>
-        </tr>
-      </thead>
-      <tbody id="applied-offers" class="divide-y divide-gray-200"></tbody>
-    </table>
-  </section>
-
-  <!-- Nouvelles offres -->
+<main class="flex-grow max-w-7xl mx-auto p-6">
   <section>
-    <h2 class="text-xl font-semibold mb-2">Nouvelles offres 
-      <span id="newOffersCount" class="text-blue-600 font-bold">(0)</span>
-    </h2>
-    <table class="table-auto w-full bg-white shadow-lg rounded-lg overflow-hidden">
-      <thead class="bg-blue-200">
-        <tr>
-          <th class="p-3 text-left">Titre</th>
-          <th class="p-3 text-left">Entreprise</th>
-          <th class="p-3 text-left">Localisation</th>
-          <th class="p-3 text-left">Lien</th>
-          <th class="p-3 text-left">Publié</th>
-          <th class="p-3 text-left">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="new-offers" class="divide-y divide-gray-200"></tbody>
-    </table>
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-semibold">Toutes les offres LinkedIn</h2>
+      <span id="totalJobs" class="text-gray-700 font-medium"></span>
+    </div>
+    <div id="jobsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+    <div class="flex justify-center items-center gap-4 my-6">
+      <button id="prevPage" class="pagination-btn bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">Précédent</button>
+      <span>Page <span id="currentPage">1</span> / <span id="totalPages">1</span></span>
+      <button id="nextPage" class="pagination-btn bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">Suivant</button>
+    </div>
+
+    <p id="noJobsMsg" class="text-center text-gray-500 mt-4 hidden">Aucune offre disponible.</p>
   </section>
 </main>
 
-<!-- ============== FOOTER ============== -->
 <footer class="bg-gray-800 text-gray-200 py-4 mt-auto text-center">
   &copy; 2025 Job Scraper - <strong>Younes Elbouknify</strong>
 </footer>
 
 <script>
-const scrapeBtn = document.getElementById("scrapeBtn");
-const scrapingLoader = document.getElementById("scrapingLoader");
-const appliedTbody = document.getElementById("applied-offers");
-const newTbody = document.getElementById("new-offers");
-const savedCountEl = document.getElementById("savedOffersCount");
-const appliedCountEl = document.getElementById("appliedOffersCount");
-const newCountEl = document.getElementById("newOffersCount");
+const jobsContainer = document.getElementById("jobsContainer");
+const prevPageBtn = document.getElementById("prevPage");
+const nextPageBtn = document.getElementById("nextPage");
+const currentPageSpan = document.getElementById("currentPage");
+const totalPagesSpan = document.getElementById("totalPages");
+const totalJobsSpan = document.getElementById("totalJobs");
+const noJobsMsg = document.getElementById("noJobsMsg");
+const clearDBBtn = document.getElementById("clearDBBtn");
+const nextScrapeTimer = document.getElementById("nextScrapeTimer");
 
-let newOffers = JSON.parse(sessionStorage.getItem("newOffers") || "[]");
-let appliedIds = [];
+let allJobs = [];
+let currentPage = 1;
+const PAGE_SIZE = 8;
+let nextScrapeTime = null;
 
-const statusOptions = ["À postuler", "Postulé", "Entretien", "Accepté", "Refusé"];
-const extractJobId = url => url?.split("?")[0].split("-").pop().match(/^\d+$/) ? url.split("-").pop() : null;
-
-const updateCounts = () => {
-  appliedCountEl.textContent = `(${appliedTbody.rows.length})`;
-  savedCountEl.textContent = appliedTbody.rows.length;
-  newCountEl.textContent = `(${newTbody.rows.length})`;
-}
-
-// Charger offres enregistrées
-async function loadAppliedJobs() {
+// Charger tous les jobs depuis la table jobs_saved
+async function loadJobs() {
   try {
-    const res = await fetch("/jobs/applied/full");
-    const data = await res.json();
-    appliedTbody.innerHTML = "";
-    appliedIds = data.map(j => extractJobId(j.Lien)).filter(Boolean);
-    data.forEach(job => addAppliedJobRow(job, job.Statut || "À postuler"));
-    updateCounts();
-  } catch (err) { console.error("Erreur chargement :", err); }
+    const res = await fetch("/jobs/saved");
+    allJobs = await res.json();
+    currentPage = 1;
+    renderJobs();
+  } catch(err) {
+    console.error(err);
+    allJobs = [];
+    renderJobs();
+  }
 }
 
-function addAppliedJobRow(job, statut) {
-  const row = document.createElement("tr");
-  row.innerHTML = `
-    <td class="p-2">${job.Titre}</td>
-    <td class="p-2">${job.Entreprise}</td>
-    <td class="p-2">${job.Localisation}</td>
-    <td class="p-2"><a href="${job.Lien}" target="_blank" class="text-blue-600 underline">Voir</a></td>
-    <td class="p-2">
-      <select class="statusSelect px-2 py-1 border rounded">
-        ${statusOptions.map(s => `<option value="${s}" ${s===statut?'selected':''}>${s}</option>`).join('')}
-      </select>
-    </td>
-  `;
-  row.querySelector(".statusSelect").addEventListener("change", async e => {
-    await saveJobStatus({...job, Statut: e.target.value});
+// Affichage des jobs avec pagination
+function renderJobs() {
+  if(allJobs.length === 0){
+    jobsContainer.innerHTML = "";
+    noJobsMsg.classList.remove("hidden");
+    prevPageBtn.disabled = true;
+    nextPageBtn.disabled = true;
+    totalJobsSpan.textContent = "0 offres";
+    currentPageSpan.textContent = 0;
+    totalPagesSpan.textContent = 0;
+    return;
+  }
+
+  noJobsMsg.classList.add("hidden");
+  totalJobsSpan.textContent = `${allJobs.length} offres`;
+
+  const totalPages = Math.ceil(allJobs.length / PAGE_SIZE);
+  currentPage = Math.min(Math.max(currentPage,1), totalPages);
+
+  currentPageSpan.textContent = currentPage;
+  totalPagesSpan.textContent = totalPages;
+
+  const start = (currentPage-1)*PAGE_SIZE;
+  const end = start + PAGE_SIZE;
+  const pageJobs = allJobs.slice(start,end);
+
+  jobsContainer.innerHTML = "";
+  pageJobs.forEach(job => {
+    const card = document.createElement("div");
+    card.className = "job-card bg-white rounded-lg shadow p-4 flex flex-col justify-between";
+    card.innerHTML = `
+      <h3 class="font-bold text-lg mb-2">${job.Titre}</h3>
+      <p class="text-gray-700 mb-1"><strong>Entreprise:</strong> ${job.Entreprise}</p>
+      <p class="text-gray-700 mb-1"><strong>Localisation:</strong> ${job.Localisation}</p>
+      <p class="text-gray-500 mb-2"><strong>Publié:</strong> ${job.Publié || "N/A"}</p>
+      <div class="flex justify-between mt-2 gap-2 flex-wrap">
+        <a href="${job.Lien}" target="_blank" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Voir l'offre</a>
+      </div>
+    `;
+    jobsContainer.appendChild(card);
   });
-  appliedTbody.appendChild(row);
+
+  prevPageBtn.disabled = currentPage === 1;
+  nextPageBtn.disabled = currentPage === totalPages;
 }
 
-// Sauvegarder statut
-async function saveJobStatus(job) {
-  try {
-    const res = await fetch("/jobs/status", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(job)
-    });
-    if (!res.ok) throw new Error(await res.text());
-  } catch (err) { alert("Erreur : " + err.message); }
+// Pagination boutons
+prevPageBtn.addEventListener("click",()=>{if(currentPage>1){currentPage--;renderJobs();}});
+nextPageBtn.addEventListener("click",()=>{const totalPages=Math.ceil(allJobs.length/PAGE_SIZE);if(currentPage<totalPages){currentPage++;renderJobs();}});
+
+// Vider DB complète
+async function clearDatabase(){
+  if(!confirm("Voulez-vous vraiment supprimer tous les jobs scrappés et réinitialiser la DB ?")) return;
+  try{
+    const res=await fetch("/jobs/scraped/clear",{method:"DELETE"});
+    const data=await res.json();
+    alert(data.message);
+    allJobs=[];
+    currentPage=1;
+    renderJobs();
+  }catch(err){console.error(err); alert("Impossible de vider la base");}
 }
 
-// Parser "Publié"
-function parseRelativeDays(text) {
-  if(!text) return Infinity;
-  text = text.toLowerCase();
-  if(text.includes("jour")) return parseInt(text) || 0;
-  if(text.includes("semaine")) return (parseInt(text) || 0) * 7;
-  if(text.includes("mois")) return (parseInt(text) || 0) * 30;
-  if(text.includes("année")) return (parseInt(text) || 0) * 365;
-  return Infinity;
+clearDBBtn.addEventListener("click",clearDatabase);
+
+// ---------------- Countdown prochaine session ----------------
+function startScrapeCountdown(){
+  fetch("/sessions")
+    .then(res=>res.json())
+    .then(sessions=>{
+      if(sessions.length===0) return;
+      const lastSession=new Date(sessions[0].created_at);
+      nextScrapeTime=new Date(lastSession.getTime()+3600*1000);
+    })
+    .catch(err=>console.error(err));
+
+  setInterval(()=>{
+    if(!nextScrapeTime) return;
+    const now=new Date();
+    const diff=Math.max(0,Math.floor((nextScrapeTime-now)/1000));
+    const h=String(Math.floor(diff/3600)).padStart(2,"0");
+    const m=String(Math.floor((diff%3600)/60)).padStart(2,"0");
+    const s=String(diff%60).padStart(2,"0");
+    nextScrapeTimer.textContent=`${h}:${m}:${s}`;
+  },1000);
 }
 
-// Afficher nouvelles offres triées
-function displayNewOffers() {
-  newTbody.innerHTML = "";
-  newOffers
-    .filter(j => !appliedIds.includes(extractJobId(j.Lien)))
-    .forEach(job => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td class="p-2">${job.Titre}</td>
-        <td class="p-2">${job.Entreprise}</td>
-        <td class="p-2">${job.Localisation}</td>
-        <td class="p-2"><a href="${job.Lien}" target="_blank" class="text-blue-600 underline">Voir</a></td>
-        <td class="p-2">${job.Publié||""}</td>
-        <td class="p-2">
-          <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600">Enregistrer</button>
-        </td>
-      `;
-      row.querySelector("button").addEventListener("click", async () => {
-        await saveJobStatus({...job, Statut:"À postuler"});
-        row.remove();
-        newOffers = newOffers.filter(j2 => extractJobId(j2.Lien) !== extractJobId(job.Lien));
-        sessionStorage.setItem("newOffers", JSON.stringify(newOffers));
-        appliedIds.push(extractJobId(job.Lien));
-        addAppliedJobRow(job, "À postuler");
-        updateCounts();
-      });
-      newTbody.appendChild(row);
-    });
-  sortNewOffersByDate();
-  updateCounts();
-}
-
-// Trier par date
-function sortNewOffersByDate() {
-  const rows = Array.from(newTbody.querySelectorAll("tr"));
-  rows.sort((a,b) => parseRelativeDays(a.cells[4].innerText) - parseRelativeDays(b.cells[4].innerText));
-  newTbody.innerHTML = "";
-  rows.forEach(r => newTbody.appendChild(r));
-}
-
-// Scraper LinkedIn
-async function scrapeLinkedin() {
-  scrapingLoader.style.display = "flex";
-  try {
-    const res = await fetch("/scrape/linkedin");
-    const data = await res.json();
-    newOffers = data.filter(j => !appliedIds.includes(extractJobId(j.Lien)));
-    sessionStorage.setItem("newOffers", JSON.stringify(newOffers));
-    displayNewOffers();
-  } catch(err) { console.error(err); }
-  finally { scrapingLoader.style.display = "none"; }
-}
-
-// Init
-window.onload = async () => { await loadAppliedJobs(); displayNewOffers(); };
-scrapeBtn.addEventListener("click", scrapeLinkedin);
+// Initialisation
+window.onload = ()=>{
+  loadJobs();
+  startScrapeCountdown();
+};
 </script>
+
 </body>
 </html>
