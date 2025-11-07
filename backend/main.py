@@ -38,7 +38,7 @@ def linkedin_redirect():
 def scrape_linkedin(db: Session):
     session_time = datetime.utcnow().strftime("%Y-%m-%d_%H-%M")
     jobs = fetch_and_save_jobs(
-        "https://www.linkedin.com/jobs/search/?currentJobId=4320385620&distance=25&f_E=1&f_JT=I&f_TPR=r86400&geoId=105015875&keywords=data%20scientist&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true",
+        "https://www.linkedin.com/jobs/search/?currentJobId=4314731267&distance=25&f_E=1&f_JT=I&f_TPR=r86400&geoId=105015875&keywords=data%20scientist&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&sortBy=DD",
         max_jobs=50
     )
     if not jobs:
