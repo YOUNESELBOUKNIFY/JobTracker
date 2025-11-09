@@ -59,9 +59,7 @@
 <header class="text-white shadow-lg py-4">
   <div class="max-w-7xl mx-auto flex justify-between items-center px-4">
     <h1 class="text-2xl font-bold">Jobs LinkedIn</h1>
-    <div class="flex gap-2">
-      <button id="clearDBBtn" class="bg-blue-700 px-4 py-2 rounded hover:bg-blue-800 font-semibold text-white transition-all">Vider base de données</button>
-    </div>
+
   </div>
   <div class="max-w-7xl mx-auto px-4 mt-2 text-indigo-200 font-semibold flex gap-2 items-center">
     <span>Prochaine session de scraping dans:</span>
@@ -172,19 +170,7 @@ function renderJobs() {
 prevPageBtn.addEventListener("click",()=>{if(currentPage>1){currentPage--;renderJobs();}});
 nextPageBtn.addEventListener("click",()=>{const totalPages=Math.ceil(allJobs.length/PAGE_SIZE);if(currentPage<totalPages){currentPage++;renderJobs();}});
 
-// Vider DB complète
-async function clearDatabase(){
-  if(!confirm("Voulez-vous vraiment supprimer tous les jobs scrappés et réinitialiser la DB ?")) return;
-  try{
-    const res=await fetch("/jobs/scraped/clear",{method:"DELETE"});
-    const data=await res.json();
-    alert(data.message);
-    allJobs=[];
-    currentPage=1;
-    renderJobs();
-  }catch(err){console.error(err); alert("Impossible de vider la base");}
-}
-clearDBBtn.addEventListener("click",clearDatabase);
+
 
 // Countdown prochaine session
 function startScrapeCountdown(){
