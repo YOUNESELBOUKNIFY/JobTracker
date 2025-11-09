@@ -5,47 +5,91 @@
   <title>Jobs LinkedIn - Job Scraper</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .job-card { transition: transform 0.2s, box-shadow 0.2s; }
-    .job-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-    .pagination-btn { transition: background 0.2s; }
-    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Thème bleu-noir moderne */
+    body {
+      background: linear-gradient(180deg, #0a0f1f, #0f172a);
+      color: #e2e8f0;
+    }
+
+    header {
+      background: linear-gradient(90deg, #1e3a8a, #0f172a);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .job-card {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+    }
+    .job-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+      background: #334155;
+    }
+
+    .pagination-btn {
+      background: #1e3a8a;
+      color: white;
+      transition: all 0.3s;
+    }
+    .pagination-btn:hover {
+      background: #2563eb;
+    }
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    footer {
+      background: #0f172a;
+      color: #94a3b8;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    a {
+      color: #3b82f6;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen font-sans">
+<body class="flex flex-col min-h-screen font-sans">
 
-<header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md py-4">
+<header class="text-white shadow-lg py-4">
   <div class="max-w-7xl mx-auto flex justify-between items-center px-4">
     <h1 class="text-2xl font-bold">Jobs LinkedIn</h1>
     <div class="flex gap-2">
-      <button id="clearDBBtn" class="bg-gray-800 px-4 py-2 rounded hover:bg-gray-900 font-semibold text-white">Vider base de données</button>
+      <button id="clearDBBtn" class="bg-blue-700 px-4 py-2 rounded hover:bg-blue-800 font-semibold text-white transition-all">Vider base de données</button>
     </div>
   </div>
   <div class="max-w-7xl mx-auto px-4 mt-2 text-indigo-200 font-semibold flex gap-2 items-center">
     <span>Prochaine session de scraping dans:</span>
-    <span id="nextScrapeTimer" class="font-bold">--:--:--</span>
+    <span id="nextScrapeTimer" class="font-bold text-lg">--:--:--</span>
   </div>
 </header>
 
 <main class="flex-grow max-w-7xl mx-auto p-6">
   <section>
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-semibold">Toutes les offres LinkedIn</h2>
-      <span id="totalJobs" class="text-gray-700 font-medium"></span>
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-semibold text-gray-100">Toutes les offres LinkedIn</h2>
+      <span id="totalJobs" class="text-gray-300 font-medium"></span>
     </div>
+
     <div id="jobsContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
-    <div class="flex justify-center items-center gap-4 my-6">
-      <button id="prevPage" class="pagination-btn bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">Précédent</button>
-      <span>Page <span id="currentPage">1</span> / <span id="totalPages">1</span></span>
-      <button id="nextPage" class="pagination-btn bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">Suivant</button>
+    <div class="flex justify-center items-center gap-4 my-8">
+      <button id="prevPage" class="pagination-btn px-4 py-2 rounded-lg shadow-sm">Précédent</button>
+      <span class="text-gray-300 font-medium">Page <span id="currentPage">1</span> / <span id="totalPages">1</span></span>
+      <button id="nextPage" class="pagination-btn px-4 py-2 rounded-lg shadow-sm">Suivant</button>
     </div>
 
-    <p id="noJobsMsg" class="text-center text-gray-500 mt-4 hidden">Aucune offre disponible.</p>
+    <p id="noJobsMsg" class="text-center text-gray-400 mt-6 hidden text-lg italic">Aucune offre disponible.</p>
   </section>
 </main>
 
-<footer class="bg-gray-800 text-gray-200 py-4 mt-auto text-center">
-  &copy; 2025 Job Scraper - <strong>Younes Elbouknify</strong>
+<footer class="py-6 mt-auto text-center shadow-inner">
+  &copy; 2025 Job Scraper - <strong class="text-white">Younes Elbouknify</strong>
 </footer>
 
 <script>
@@ -107,14 +151,14 @@ function renderJobs() {
   jobsContainer.innerHTML = "";
   pageJobs.forEach(job => {
     const card = document.createElement("div");
-    card.className = "job-card bg-white rounded-lg shadow p-4 flex flex-col justify-between";
+    card.className = "job-card rounded-lg p-4 flex flex-col justify-between";
     card.innerHTML = `
-      <h3 class="font-bold text-lg mb-2">${job.Titre}</h3>
-      <p class="text-gray-700 mb-1"><strong>Entreprise:</strong> ${job.Entreprise}</p>
-      <p class="text-gray-700 mb-1"><strong>Localisation:</strong> ${job.Localisation}</p>
-      <p class="text-gray-500 mb-2"><strong>Publié:</strong> ${job.Publié || "N/A"}</p>
+      <h3 class="font-bold text-lg text-gray-100 mb-2">${job.Titre}</h3>
+      <p class="text-gray-300 mb-1"><strong>Entreprise:</strong> ${job.Entreprise}</p>
+      <p class="text-gray-300 mb-1"><strong>Localisation:</strong> ${job.Localisation}</p>
+      <p class="text-gray-400 mb-2"><strong>Publié:</strong> ${job.Publié || "N/A"}</p>
       <div class="flex justify-between mt-2 gap-2 flex-wrap">
-        <a href="${job.Lien}" target="_blank" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Voir l'offre</a>
+        <a href="${job.Lien}" target="_blank" class="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 shadow transition-all">Voir l'offre</a>
       </div>
     `;
     jobsContainer.appendChild(card);
@@ -140,10 +184,9 @@ async function clearDatabase(){
     renderJobs();
   }catch(err){console.error(err); alert("Impossible de vider la base");}
 }
-
 clearDBBtn.addEventListener("click",clearDatabase);
 
-// ---------------- Countdown prochaine session ----------------
+// Countdown prochaine session
 function startScrapeCountdown(){
   fetch("/sessions")
     .then(res=>res.json())
